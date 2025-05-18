@@ -1,0 +1,16 @@
+# Changes here will be overwritten by Copier
+_commit: 3.0.0
+_src_path: gh:DiamondLightSource/python-copier-template
+author_email: gary.yendell@diamond.ac.uk
+author_name: Gary Yendell
+description: FastCS2
+distribution_name: fastcs2
+docker: false
+docs_type: README
+git_platform: github.com
+github_org: GDYendell
+package_name: fastcs2
+pypi: false
+repo_name: fastcs2
+strict_typing: true
+type_checker: pyright
