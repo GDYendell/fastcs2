@@ -5,4 +5,4 @@ class AttributeRef:
     pass
 
 
-AttrRefT = TypeVar("AttrRefT", bound=AttributeRef)
+AttrRefT = TypeVar("AttrRefT", bound=AttributeRef, covariant=True)

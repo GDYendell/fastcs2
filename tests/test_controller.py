@@ -5,7 +5,7 @@ from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller import Controller
 from fastcs2.controller_io import ControllerIO
 from fastcs2.demo.controller import SystemMonitorController
-from fastcs2.demo.controller_io import SystemMonitorControllerIO
+from fastcs2.demo.controller_io import SensorsTemperaturesControllerIO
 
 
 class MyAttrRef(AttributeRef):
@@ -32,7 +32,7 @@ async def test_controller():
 
 @pytest.mark.asyncio
 async def test_sys_controller():
-    controller = SystemMonitorController(SystemMonitorControllerIO())
+    controller = SystemMonitorController(SensorsTemperaturesControllerIO())
 
     assert controller.cpu_temp.get() == 0.0
     await controller.io.update(controller.cpu_temp)

@@ -1,17 +1,48 @@
-from psutil import sensors_temperatures
-
 from fastcs2.attribute import Attribute
 from fastcs2.controller import Controller
-from fastcs2.demo.attr_ref import SystemMonitorAttrRef
+from fastcs2.demo.attr_ref import (
+    AverageSummaryAttrRef,
+    SensorsBatteryAttrRef,
+    SensorsTemperaturesAttrRef,
+)
+from fastcs2.demo.controller_io import (
+    AverageSummaryControllerIO,
+    SensorsBatteryControllerIO,
+    SensorsTemperaturesControllerIO,
+)
 
 
-class SystemMonitorController(Controller[SystemMonitorAttrRef]):
-    cpu_temp = Attribute(
-        "state",
+class SystemMonitorController(Controller):
+    temp_average = Attribute(
+        "temp_average",
         float,
-        SystemMonitorAttrRef(sensors_temperatures, "k10temp", 0, "current"),
+        AverageSummaryAttrRef("temp"),
+    )
+    cpu_temp = Attribute(
+        "cpu_temp",
+        float,
+        SensorsTemperaturesAttrRef("k10temp", 0, "current"),
+    )
+    gpu_temp = Attribute(
+        "gpu_temp",
+        float,
+        SensorsTemperaturesAttrRef("amdgpu", 0, "current"),
+    )
+    battery_level = Attribute(
+        "battery_level",
+        float,
+        SensorsBatteryAttrRef("percent"),
     )
 
     # @attr
     # def gpu_temp(self) -> float:
     #     return sensors_temperatures()["k10temp"][1].current
+
+    def __init__(self):
+        super().__init__(
+            {
+                SensorsBatteryAttrRef: SensorsBatteryControllerIO(),
+                SensorsTemperaturesAttrRef: SensorsTemperaturesControllerIO(),
+                AverageSummaryAttrRef: AverageSummaryControllerIO(),
+            }
+        )
