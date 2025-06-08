@@ -13,11 +13,6 @@ from fastcs2.demo.controller_io import (
 
 
 class SystemMonitorController(Controller):
-    temp_average = Attribute(
-        "temp_average",
-        float,
-        AverageSummaryAttrRef("temp"),
-    )
     cpu_temp = Attribute(
         "cpu_temp",
         float,
@@ -45,4 +40,9 @@ class SystemMonitorController(Controller):
                 SensorsTemperaturesAttrRef: SensorsTemperaturesControllerIO(),
                 AverageSummaryAttrRef: AverageSummaryControllerIO(),
             }
+        )
+        self.temp_average = Attribute(
+            "temp_average",
+            float,
+            AverageSummaryAttrRef([self.cpu_temp, self.gpu_temp]),
         )

@@ -26,11 +26,6 @@ class Engine:
                 )
                 self._controller.attributes.append(attribute)
 
-        for attribute in self._controller.attributes:
-            await self._controller.io[attribute.ref.__class__].initialise(
-                attribute, self._controller.attributes
-            )
-
         async def _scan():
             while True:
                 await asyncio.gather(

@@ -12,7 +12,4 @@ class Controller:
         self.attributes: list[Attribute[AttributeRef, DataType]] = []
 
     async def initialise(self):
-        for attribute in self.attributes:
-            await self.io[attribute.ref.__class__].initialise(
-                attribute, self.attributes
-            )
+        pass

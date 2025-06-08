@@ -1,5 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from fastcs2.attribute import Attribute
 from fastcs2.attribute_ref import AttributeRef
 
 
@@ -17,7 +18,8 @@ class SensorsBatteryAttrRef(AttributeRef):
 
 @dataclass
 class AverageSummaryAttrRef(AttributeRef):
-    pattern: str
-
+    attributes: list[Attribute[AttributeRef, float]] = field(
+        default_factory=list[Attribute[AttributeRef, float]]
+    )
 
 SystemMonitorAttributeRef = SensorsTemperaturesAttrRef | SensorsBatteryAttrRef
