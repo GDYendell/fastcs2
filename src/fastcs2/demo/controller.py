@@ -1,4 +1,7 @@
+from functools import cached_property
+
 from fastcs2.attribute import Attribute
+from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller import Controller
 from fastcs2.demo.attr_ref import (
     AverageSummaryAttrRef,
@@ -29,9 +32,22 @@ class SystemMonitorController(Controller):
         SensorsBatteryAttrRef("percent"),
     )
 
+    @cached_property
+    def _temperature_attributes(self) -> list[Attribute[AttributeRef, float]]:
+        temperature_attributes: list[Attribute[AttributeRef, float]] = []
+        for attribute in self.attributes:
+            if attribute.name.startswith("temp_"):
+                assert issubclass(attribute.datatype, float)
+                temperature_attributes.append(attribute)  # type:ignore
+
+        return temperature_attributes
+
+    # TODO
     # @attr
-    # def gpu_temp(self) -> float:
-    #     return sensors_temperatures()["k10temp"][1].current
+    # def temp_average(self) -> float:
+    #     return sum(attr.get() for attr in self._temperature_attributes) / len(
+    #         self._temperature_attributes
+    #     )
 
     def __init__(self):
         super().__init__(
