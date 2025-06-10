@@ -22,4 +22,5 @@ class AverageSummaryAttrRef(AttributeRef):
         default_factory=list[Attribute[AttributeRef, float]]
     )
 
+
 SystemMonitorAttributeRef = SensorsTemperaturesAttrRef | SensorsBatteryAttrRef
