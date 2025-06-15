@@ -1,7 +1,7 @@
 from collections.abc import Callable, Coroutine
 from functools import partial
 
-from fastcs2.attribute import Attribute, AttributeR, AttributeRW
+from fastcs2.attribute import Attribute, AttributeR, AttributeRW, AttributeW
 from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller_api import ControllerAPI
 from fastcs2.controller_io import ControllerIO
@@ -25,7 +25,7 @@ class Controller:
                 continue
 
             attribute = getattr(self, attribute_name)
-            if isinstance(attribute, Attribute):
+            if isinstance(attribute, AttributeR | AttributeW):
                 io_type = type(attribute.ref)  # type: ignore
                 assert issubclass(io_type, AttributeRef)
 
