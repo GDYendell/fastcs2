@@ -17,7 +17,7 @@ class Controller:
         self.attributes: list[Attribute[AttributeRef, DataType]] = []
 
         self._bind_attrs()
-        self._create_send_callbacks()
+        self._link_attr_put_send_callbacks()
 
     def _bind_attrs(self):
         for attribute_name in dir(self):
@@ -43,10 +43,10 @@ class Controller:
             if isinstance(attribute, AttributeR)
         ]
 
-    def _create_send_callbacks(self):
+    def _link_attr_put_send_callbacks(self):
         for attribute in self.attributes:
             if isinstance(attribute, AttributeRW):
-                attribute.set_callbacks.append(self.io[type(attribute.ref)].send)
+                attribute.put_callbacks.append(self.io[type(attribute.ref)].send)
 
     def build_api(self) -> ControllerAPI:
         return ControllerAPI(self.attributes)

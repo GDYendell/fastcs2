@@ -40,13 +40,13 @@ class AttributeW(Attribute[AttrRefT, DataTypeT]):
     def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
         super().__init__(name, datatype, ref)
 
-        self.set_callbacks: list[
+        self.put_callbacks: list[
             Callable[[DataTypeT], Coroutine[None, None, None]]
         ] = []
         """Callbacks to be called when the attribute is set from an API call"""
 
-    async def set(self, value: Any):
-        for callback in self.set_callbacks:
+    async def put(self, value: Any):
+        for callback in self.put_callbacks:
             await callback(value)
 
 
@@ -54,6 +54,6 @@ class AttributeRW(AttributeR[AttrRefT, DataTypeT], AttributeW[AttrRefT, DataType
     def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
         super().__init__(name, datatype, ref)
 
-    async def set(self, value: Any):
-        await super().set(value)
+    async def put(self, value: Any):
+        await super().put(value)
         self._set(value)
