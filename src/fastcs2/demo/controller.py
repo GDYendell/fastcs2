@@ -5,18 +5,19 @@ from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller import Controller
 from fastcs2.controller_io import ControllerIO
 from fastcs2.datatypes import DataType
-from fastcs2.demo.attr_ref import (
+from fastcs2.demo.io import (
     AverageSummaryAttrRef,
-    SensorsBatteryAttrRef,
-    SensorsTemperaturesAttrRef,
-)
-from fastcs2.demo.controller_io import (
     AverageSummaryControllerIO,
+    ScreenBrightnessAttrRef,
+    ScreenBrightnessControllerIO,
+    SensorsBatteryAttrRef,
     SensorsBatteryControllerIO,
+    SensorsTemperaturesAttrRef,
     SensorsTemperaturesControllerIO,
 )
 
 IO_MAP: dict[type[AttributeRef], ControllerIO[AttributeRef, DataType]] = {
+    ScreenBrightnessAttrRef: ScreenBrightnessControllerIO(),
     SensorsBatteryAttrRef: SensorsBatteryControllerIO(),
     SensorsTemperaturesAttrRef: SensorsTemperaturesControllerIO(),
     AverageSummaryAttrRef: AverageSummaryControllerIO(),
@@ -38,6 +39,11 @@ class SystemMonitorController(Controller):
         "battery_level",
         float,
         SensorsBatteryAttrRef("percent"),
+    )
+    screen_brightness = Attribute(
+        "screen_brightness",
+        float,
+        ScreenBrightnessAttrRef(),
     )
 
     @cached_property

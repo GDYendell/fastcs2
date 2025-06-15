@@ -15,6 +15,7 @@ class Controller:
         self.attributes: list[Attribute[AttributeRef, DataType]] = []
 
         self._bind_attrs()
+        self._create_send_callbacks()
 
     def _bind_attrs(self):
         for attribute_name in dir(self):
@@ -38,3 +39,7 @@ class Controller:
             partial(self.io[type(attribute.ref)].update, attribute)
             for attribute in self.attributes
         ]
+
+    def _create_send_callbacks(self):
+        for attribute in self.attributes:
+            attribute.send_callbacks.append(self.io[type(attribute.ref)].send)

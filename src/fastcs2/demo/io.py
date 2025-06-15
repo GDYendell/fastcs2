@@ -1,15 +1,33 @@
 import logging
+from dataclasses import dataclass, field
 
 from psutil import sensors_battery, sensors_temperatures  # type: ignore
+from screen_brightness_control import get_brightness, set_brightness  # type: ignore
 
 from fastcs2.attribute import Attribute
+from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller_io import ControllerIO
 from fastcs2.datatypes import DataType
-from fastcs2.demo.attr_ref import (
-    AverageSummaryAttrRef,
-    SensorsBatteryAttrRef,
-    SensorsTemperaturesAttrRef,
-)
+
+
+class ScreenBrightnessAttrRef(AttributeRef):
+    pass
+
+
+class ScreenBrightnessControllerIO(ControllerIO[AttributeRef, DataType]):
+    async def update(self, attr: Attribute[AttributeRef, DataType]):
+        attr.set(get_brightness()[0])
+        logging.info(f"{attr.name}: {attr.get()}")
+
+    async def send(self, attr: Attribute[AttributeRef, DataType]):
+        set_brightness(attr.get())
+
+
+@dataclass
+class SensorsTemperaturesAttrRef(AttributeRef):
+    key: str
+    index: int
+    field: str
 
 
 class SensorsTemperaturesControllerIO(
@@ -23,6 +41,11 @@ class SensorsTemperaturesControllerIO(
         logging.info(f"{attr.name}: {attr.get()}")
 
 
+@dataclass
+class SensorsBatteryAttrRef(AttributeRef):
+    field: str
+
+
 class SensorsBatteryControllerIO(ControllerIO[SensorsBatteryAttrRef, DataType]):
     def _get_battery(self, ref: SensorsBatteryAttrRef) -> int | float | str:
         return getattr(sensors_battery(), ref.field)  # type: ignore
@@ -30,6 +53,13 @@ class SensorsBatteryControllerIO(ControllerIO[SensorsBatteryAttrRef, DataType]):
     async def update(self, attr: Attribute[SensorsBatteryAttrRef, DataType]):
         attr.set(self._get_battery(attr.ref))
         logging.info(f"{attr.name}: {attr.get()}")
+
+
+@dataclass
+class AverageSummaryAttrRef(AttributeRef):
+    attributes: list[Attribute[AttributeRef, float]] = field(
+        default_factory=list[Attribute[AttributeRef, float]]
+    )
 
 
 class AverageSummaryControllerIO(ControllerIO[AverageSummaryAttrRef, float]):
