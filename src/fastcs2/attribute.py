@@ -10,10 +10,17 @@ class Attribute(Generic[AttrRefT, DataTypeT]):
         self.name = name
         self.datatype = datatype
         self.ref = ref
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.name},  {self.datatype.__name__})"
+
+
+class AttributeR(Attribute[AttrRefT, DataTypeT]):
+    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
+        super().__init__(name, datatype, ref)
+
         self._value = datatype()
 
-        self.set_callbacks: list[Callable[[Self], Coroutine[None, None, None]]] = []
-        """Callbacks to be called when the attribute is set from an API call"""
         self.update_callbacks: list[Callable[[Self], Coroutine[None, None, None]]] = []
         """Callbacks to be called when the attribute is updated from hardware"""
 
@@ -23,15 +30,28 @@ class Attribute(Generic[AttrRefT, DataTypeT]):
     def _set(self, value: Any):
         self._value = self.datatype(value)
 
-    async def set(self, value: Any):
-        self._set(value)
-        for callback in self.set_callbacks:
-            await callback(self)
-
     async def update(self, value: Any):
         self._set(value)
         for callback in self.update_callbacks:
             await callback(self)
 
-    def __repr__(self):
-        return f"{self.name}: {self._value}"
+
+class AttributeW(Attribute[AttrRefT, DataTypeT]):
+    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
+        super().__init__(name, datatype, ref)
+
+        self.set_callbacks: list[Callable[[Self], Coroutine[None, None, None]]] = []
+        """Callbacks to be called when the attribute is set from an API call"""
+
+    async def set(self, value: Any):
+        for callback in self.set_callbacks:
+            await callback(self)
+
+
+class AttributeRW(AttributeR[AttrRefT, DataTypeT], AttributeW[AttrRefT, DataTypeT]):
+    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
+        super().__init__(name, datatype, ref)
+
+    async def set(self, value: Any):
+        await super().set(value)
+        self._set(value)

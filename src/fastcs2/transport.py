@@ -1,4 +1,4 @@
-from fastcs2.attribute import Attribute
+from fastcs2.attribute import AttributeR
 from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller_api import ControllerAPI
 from fastcs2.datatypes import DataType
@@ -9,7 +9,7 @@ class Transport:
         self.api = api
 
 
-async def log_attr_update(attr: Attribute[AttributeRef, DataType]):
+async def log_attr_update(attr: AttributeR[AttributeRef, DataType]):
     print(f"{attr.name}: {attr.get()}")
 
 
@@ -18,4 +18,5 @@ class LogTransport(Transport):
         super().__init__(api)
 
         for attribute in api.attributes:
-            attribute.update_callbacks.append(log_attr_update)
+            if isinstance(attribute, AttributeR):
+                attribute.update_callbacks.append(log_attr_update)

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from psutil import sensors_battery, sensors_temperatures  # type: ignore
 from screen_brightness_control import get_brightness, set_brightness  # type: ignore
 
-from fastcs2.attribute import Attribute
+from fastcs2.attribute import AttributeR, AttributeRW
 from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller_io import ControllerIO
 from fastcs2.datatypes import DataType
@@ -13,11 +13,11 @@ class ScreenBrightnessAttrRef(AttributeRef):
     pass
 
 
-class ScreenBrightnessControllerIO(ControllerIO[AttributeRef, DataType]):
-    async def update(self, attr: Attribute[AttributeRef, DataType]):
+class ScreenBrightnessControllerIO(ControllerIO[ScreenBrightnessAttrRef, DataType]):
+    async def update(self, attr: AttributeR[AttributeRef, DataType]):
         await attr.update(get_brightness()[0])
 
-    async def send(self, attr: Attribute[AttributeRef, DataType]):
+    async def send(self, attr: AttributeRW[AttributeRef, DataType]):
         set_brightness(attr.get())
 
 
@@ -34,7 +34,7 @@ class SensorsTemperaturesControllerIO(
     def _get_temp(self, ref: SensorsTemperaturesAttrRef) -> int | float | str:
         return getattr(sensors_temperatures()[ref.key][ref.index], ref.field)
 
-    async def update(self, attr: Attribute[SensorsTemperaturesAttrRef, DataType]):
+    async def update(self, attr: AttributeR[SensorsTemperaturesAttrRef, DataType]):
         await attr.update(self._get_temp(attr.ref))
 
 
@@ -47,19 +47,19 @@ class SensorsBatteryControllerIO(ControllerIO[SensorsBatteryAttrRef, DataType]):
     def _get_battery(self, ref: SensorsBatteryAttrRef) -> int | float | str:
         return getattr(sensors_battery(), ref.field)  # type: ignore
 
-    async def update(self, attr: Attribute[SensorsBatteryAttrRef, DataType]):
+    async def update(self, attr: AttributeR[SensorsBatteryAttrRef, DataType]):
         await attr.update(self._get_battery(attr.ref))
 
 
 @dataclass
 class AverageSummaryAttrRef(AttributeRef):
-    attributes: list[Attribute[AttributeRef, float]] = field(
-        default_factory=list[Attribute[AttributeRef, float]]
+    attributes: list[AttributeR[AttributeRef, float]] = field(
+        default_factory=list[AttributeR[AttributeRef, float]]
     )
 
 
 class AverageSummaryControllerIO(ControllerIO[AverageSummaryAttrRef, float]):
-    async def update(self, attr: Attribute[AverageSummaryAttrRef, float]):
+    async def update(self, attr: AttributeR[AverageSummaryAttrRef, float]):
         await attr.update(
             sum(attr.get() for attr in attr.ref.attributes) / len(attr.ref.attributes)
         )

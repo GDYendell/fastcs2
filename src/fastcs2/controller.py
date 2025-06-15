@@ -1,7 +1,7 @@
 from collections.abc import Callable, Coroutine
 from functools import partial
 
-from fastcs2.attribute import Attribute
+from fastcs2.attribute import Attribute, AttributeR, AttributeRW
 from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller_api import ControllerAPI
 from fastcs2.controller_io import ControllerIO
@@ -39,11 +39,13 @@ class Controller:
         return [
             partial(self.io[type(attribute.ref)].update, attribute)
             for attribute in self.attributes
+            if isinstance(attribute, AttributeR)
         ]
 
     def _create_send_callbacks(self):
         for attribute in self.attributes:
-            attribute.set_callbacks.append(self.io[type(attribute.ref)].send)
+            if isinstance(attribute, AttributeRW):
+                attribute.set_callbacks.append(self.io[type(attribute.ref)].send)
 
     def build_api(self) -> ControllerAPI:
         return ControllerAPI(self.attributes)

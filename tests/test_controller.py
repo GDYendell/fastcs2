@@ -1,6 +1,6 @@
 import pytest
 
-from fastcs2.attribute import Attribute
+from fastcs2.attribute import AttributeR
 from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller import Controller
 from fastcs2.controller_io import ControllerIO
@@ -14,14 +14,14 @@ class MyAttrRef(AttributeRef):
 
 
 class MyControllerIO(ControllerIO[MyAttrRef, DataType]):
-    async def update(self, attr: Attribute[MyAttrRef, DataType]):
+    async def update(self, attr: AttributeR[MyAttrRef, DataType]):
         await attr.update(attr.datatype("ON"))
 
 
 class MyController(Controller):
     def __init__(self, io: MyControllerIO):
         super().__init__({MyAttrRef: io})
-        self.state = Attribute("state", str, MyAttrRef())
+        self.state = AttributeR("state", str, MyAttrRef())
 
 
 @pytest.mark.asyncio
