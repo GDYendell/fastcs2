@@ -11,17 +11,26 @@ class Attribute(Generic[AttrRefT, DataTypeT]):
         self.datatype = datatype
         self.ref = ref
         self._value = datatype()
-        self.send_callbacks: list[Callable[[Self], Coroutine[None, None, None]]] = []
+
+        self.set_callbacks: list[Callable[[Self], Coroutine[None, None, None]]] = []
+        """Callbacks to be called when the attribute is set from an API call"""
+        self.update_callbacks: list[Callable[[Self], Coroutine[None, None, None]]] = []
+        """Callbacks to be called when the attribute is updated from hardware"""
 
     def get(self) -> DataTypeT:
         return self._value
 
-    def set(self, value: Any):
+    def _set(self, value: Any):
         self._value = self.datatype(value)
 
-    async def put(self, value: Any):
-        self.set(value)
-        for callback in self.send_callbacks:
+    async def set(self, value: Any):
+        self._set(value)
+        for callback in self.set_callbacks:
+            await callback(self)
+
+    async def update(self, value: Any):
+        self._set(value)
+        for callback in self.update_callbacks:
             await callback(self)
 
     def __repr__(self):

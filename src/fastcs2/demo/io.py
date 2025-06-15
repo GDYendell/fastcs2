@@ -16,7 +16,7 @@ class ScreenBrightnessAttrRef(AttributeRef):
 
 class ScreenBrightnessControllerIO(ControllerIO[AttributeRef, DataType]):
     async def update(self, attr: Attribute[AttributeRef, DataType]):
-        attr.set(get_brightness()[0])
+        await attr.update(get_brightness()[0])
         logging.info(f"{attr.name}: {attr.get()}")
 
     async def send(self, attr: Attribute[AttributeRef, DataType]):
@@ -37,7 +37,7 @@ class SensorsTemperaturesControllerIO(
         return getattr(sensors_temperatures()[ref.key][ref.index], ref.field)
 
     async def update(self, attr: Attribute[SensorsTemperaturesAttrRef, DataType]):
-        attr.set(self._get_temp(attr.ref))
+        await attr.update(self._get_temp(attr.ref))
         logging.info(f"{attr.name}: {attr.get()}")
 
 
@@ -51,7 +51,7 @@ class SensorsBatteryControllerIO(ControllerIO[SensorsBatteryAttrRef, DataType]):
         return getattr(sensors_battery(), ref.field)  # type: ignore
 
     async def update(self, attr: Attribute[SensorsBatteryAttrRef, DataType]):
-        attr.set(self._get_battery(attr.ref))
+        await attr.update(self._get_battery(attr.ref))
         logging.info(f"{attr.name}: {attr.get()}")
 
 
@@ -64,7 +64,7 @@ class AverageSummaryAttrRef(AttributeRef):
 
 class AverageSummaryControllerIO(ControllerIO[AverageSummaryAttrRef, float]):
     async def update(self, attr: Attribute[AverageSummaryAttrRef, float]):
-        attr.set(
+        await attr.update(
             sum(attr.get() for attr in attr.ref.attributes) / len(attr.ref.attributes)
         )
         logging.info(f"{attr.name}: {attr.get()}")

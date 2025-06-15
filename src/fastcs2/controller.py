@@ -42,4 +42,4 @@ class Controller:
 
     def _create_send_callbacks(self):
         for attribute in self.attributes:
-            attribute.send_callbacks.append(self.io[type(attribute.ref)].send)
+            attribute.set_callbacks.append(self.io[type(attribute.ref)].send)

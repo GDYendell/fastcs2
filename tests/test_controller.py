@@ -5,8 +5,8 @@ from fastcs2.attribute_ref import AttributeRef
 from fastcs2.controller import Controller
 from fastcs2.controller_io import ControllerIO
 from fastcs2.datatypes import DataType
-from fastcs2.demo.attr_ref import SensorsTemperaturesAttrRef
 from fastcs2.demo.controller import SystemMonitorController
+from fastcs2.demo.io import SensorsTemperaturesAttrRef
 
 
 class MyAttrRef(AttributeRef):
@@ -15,7 +15,7 @@ class MyAttrRef(AttributeRef):
 
 class MyControllerIO(ControllerIO[MyAttrRef, DataType]):
     async def update(self, attr: Attribute[MyAttrRef, DataType]):
-        attr.set(attr.datatype("ON"))
+        await attr.update(attr.datatype("ON"))
 
 
 class MyController(Controller):
