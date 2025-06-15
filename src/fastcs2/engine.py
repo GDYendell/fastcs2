@@ -4,6 +4,7 @@ from functools import partial
 from IPython.terminal.embed import InteractiveShellEmbed
 
 from fastcs2.controller import Controller
+from fastcs2.transport import Transport
 
 
 async def interactive_shell(context: dict[str, object]):
@@ -12,13 +13,21 @@ async def interactive_shell(context: dict[str, object]):
 
 
 class Engine:
-    def __init__(self, loop: asyncio.AbstractEventLoop, controller: Controller) -> None:
+    def __init__(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        controller: Controller,
+        transports: list[type[Transport]],
+    ) -> None:
         self._loop = loop
         self._controller = controller
+        self._transports = transports
 
     async def serve(self) -> None:
         await self._controller.initialise()
         update_tasks = self._controller.create_update_tasks()
+
+        api = self._controller.build_api()
 
         async def _scan():
             while True:
@@ -27,6 +36,9 @@ class Engine:
                 )
 
         self._loop.create_task(_scan())
+
+        for transport in self._transports:
+            transport(api)
 
         self._loop.create_task(interactive_shell({"controller": self._controller}))
 

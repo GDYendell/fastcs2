@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass, field
 
 from psutil import sensors_battery, sensors_temperatures  # type: ignore
@@ -17,7 +16,6 @@ class ScreenBrightnessAttrRef(AttributeRef):
 class ScreenBrightnessControllerIO(ControllerIO[AttributeRef, DataType]):
     async def update(self, attr: Attribute[AttributeRef, DataType]):
         await attr.update(get_brightness()[0])
-        logging.info(f"{attr.name}: {attr.get()}")
 
     async def send(self, attr: Attribute[AttributeRef, DataType]):
         set_brightness(attr.get())
@@ -38,7 +36,6 @@ class SensorsTemperaturesControllerIO(
 
     async def update(self, attr: Attribute[SensorsTemperaturesAttrRef, DataType]):
         await attr.update(self._get_temp(attr.ref))
-        logging.info(f"{attr.name}: {attr.get()}")
 
 
 @dataclass
@@ -52,7 +49,6 @@ class SensorsBatteryControllerIO(ControllerIO[SensorsBatteryAttrRef, DataType]):
 
     async def update(self, attr: Attribute[SensorsBatteryAttrRef, DataType]):
         await attr.update(self._get_battery(attr.ref))
-        logging.info(f"{attr.name}: {attr.get()}")
 
 
 @dataclass
@@ -67,4 +63,3 @@ class AverageSummaryControllerIO(ControllerIO[AverageSummaryAttrRef, float]):
         await attr.update(
             sum(attr.get() for attr in attr.ref.attributes) / len(attr.ref.attributes)
         )
-        logging.info(f"{attr.name}: {attr.get()}")

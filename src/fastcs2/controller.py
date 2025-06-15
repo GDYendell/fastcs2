@@ -3,6 +3,7 @@ from functools import partial
 
 from fastcs2.attribute import Attribute
 from fastcs2.attribute_ref import AttributeRef
+from fastcs2.controller_api import ControllerAPI
 from fastcs2.controller_io import ControllerIO
 from fastcs2.datatypes import DataType
 
@@ -43,3 +44,6 @@ class Controller:
     def _create_send_callbacks(self):
         for attribute in self.attributes:
             attribute.set_callbacks.append(self.io[type(attribute.ref)].send)
+
+    def build_api(self) -> ControllerAPI:
+        return ControllerAPI(self.attributes)
