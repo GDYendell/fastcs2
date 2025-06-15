@@ -1,22 +1,22 @@
 from collections.abc import Callable, Coroutine
 from typing import Any, Generic, Self
 
-from fastcs2.attribute_ref import AttrRefT
+from fastcs2.attribute_io_ref import AttributeIORefT
 from fastcs2.datatypes import DataTypeT
 
 
-class Attribute(Generic[AttrRefT, DataTypeT]):
-    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
+class Attribute(Generic[AttributeIORefT, DataTypeT]):
+    def __init__(self, name: str, datatype: type[DataTypeT], io: AttributeIORefT):
         self.name = name
         self.datatype = datatype
-        self.ref = ref
+        self.io = io
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.name},  {self.datatype.__name__})"
 
 
-class AttributeR(Attribute[AttrRefT, DataTypeT]):
-    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
+class AttributeR(Attribute[AttributeIORefT, DataTypeT]):
+    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttributeIORefT):
         super().__init__(name, datatype, ref)
 
         self._value = datatype()
@@ -36,8 +36,8 @@ class AttributeR(Attribute[AttrRefT, DataTypeT]):
             await callback(self)
 
 
-class AttributeW(Attribute[AttrRefT, DataTypeT]):
-    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
+class AttributeW(Attribute[AttributeIORefT, DataTypeT]):
+    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttributeIORefT):
         super().__init__(name, datatype, ref)
 
         self.put_callbacks: list[
@@ -50,8 +50,10 @@ class AttributeW(Attribute[AttrRefT, DataTypeT]):
             await callback(value)
 
 
-class AttributeRW(AttributeR[AttrRefT, DataTypeT], AttributeW[AttrRefT, DataTypeT]):
-    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttrRefT):
+class AttributeRW(
+    AttributeR[AttributeIORefT, DataTypeT], AttributeW[AttributeIORefT, DataTypeT]
+):
+    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttributeIORefT):
         super().__init__(name, datatype, ref)
 
     async def put(self, value: Any):

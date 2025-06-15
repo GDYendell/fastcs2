@@ -1,26 +1,29 @@
 from functools import cached_property
 
-from fastcs2.attribute import Attribute, AttributeR, AttributeRW
-from fastcs2.attribute_ref import AttributeRef
-from fastcs2.controller import Controller
-from fastcs2.controller_io import ControllerIO
-from fastcs2.datatypes import DataType
-from fastcs2.demo.io import (
-    AverageSummaryAttrRef,
-    AverageSummaryControllerIO,
-    ScreenBrightnessAttrRef,
-    ScreenBrightnessControllerIO,
-    SensorsBatteryAttrRef,
-    SensorsBatteryControllerIO,
-    SensorsTemperaturesAttrRef,
-    SensorsTemperaturesControllerIO,
+from fastcs2 import (
+    AttributeIO,
+    AttributeIORef,
+    AttributeR,
+    AttributeRW,
+    Controller,
+    DataType,
+)
+from fastcs2.demo.attribute_io import (
+    AverageSummaryAttributeIO,
+    AverageSummaryAttributeIORef,
+    ScreenBrightnessAttributeIO,
+    ScreenBrightnessAttributeIORef,
+    SensorsBatteryAttributeIO,
+    SensorsBatteryAttributeIORef,
+    SensorsTemperaturesAttributeIO,
+    SensorsTemperaturesAttributeIORef,
 )
 
-IO_MAP: dict[type[AttributeRef], ControllerIO[AttributeRef, DataType, DataType]] = {
-    ScreenBrightnessAttrRef: ScreenBrightnessControllerIO(),
-    SensorsBatteryAttrRef: SensorsBatteryControllerIO(),
-    SensorsTemperaturesAttrRef: SensorsTemperaturesControllerIO(),
-    AverageSummaryAttrRef: AverageSummaryControllerIO(),
+IO_MAP: dict[type[AttributeIORef], AttributeIO[AttributeIORef, DataType, DataType]] = {
+    ScreenBrightnessAttributeIORef: ScreenBrightnessAttributeIO(),
+    SensorsBatteryAttributeIORef: SensorsBatteryAttributeIO(),
+    SensorsTemperaturesAttributeIORef: SensorsTemperaturesAttributeIO(),
+    AverageSummaryAttributeIORef: AverageSummaryAttributeIO(),
 }
 
 
@@ -28,27 +31,27 @@ class SystemMonitorController(Controller):
     cpu_temp = AttributeR(
         "cpu_temp",
         float,
-        SensorsTemperaturesAttrRef("k10temp", 0, "current"),
+        SensorsTemperaturesAttributeIORef("k10temp", 0, "current"),
     )
     gpu_temp = AttributeR(
         "gpu_temp",
         float,
-        SensorsTemperaturesAttrRef("amdgpu", 0, "current"),
+        SensorsTemperaturesAttributeIORef("amdgpu", 0, "current"),
     )
     battery_level = AttributeR(
         "battery_level",
         float,
-        SensorsBatteryAttrRef("percent"),
+        SensorsBatteryAttributeIORef("percent"),
     )
     screen_brightness = AttributeRW(
         "screen_brightness",
         float,
-        ScreenBrightnessAttrRef(),
+        ScreenBrightnessAttributeIORef(),
     )
 
     @cached_property
-    def _temperature_attributes(self) -> list[AttributeR[AttributeRef, float]]:
-        temperature_attributes: list[AttributeR[AttributeRef, float]] = []
+    def _temperature_attributes(self) -> list[AttributeR[AttributeIORef, float]]:
+        temperature_attributes: list[AttributeR[AttributeIORef, float]] = []
         for attribute in self.attributes:
             if attribute.name.startswith("temp_"):
                 assert issubclass(attribute.datatype, float)
@@ -68,7 +71,7 @@ class SystemMonitorController(Controller):
         self.temp_average = AttributeR(
             "temp_average",
             float,
-            AverageSummaryAttrRef([self.cpu_temp, self.gpu_temp]),
+            AverageSummaryAttributeIORef([self.cpu_temp, self.gpu_temp]),
         )
 
         super().__init__(IO_MAP)

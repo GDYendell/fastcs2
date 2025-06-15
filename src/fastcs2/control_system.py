@@ -14,7 +14,7 @@ async def interactive_shell(context: dict[str, object], stop_event: asyncio.Even
     stop_event.set()
 
 
-class Engine:
+class FastCS:
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop,

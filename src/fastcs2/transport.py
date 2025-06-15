@@ -1,5 +1,5 @@
 from fastcs2.attribute import AttributeR
-from fastcs2.attribute_ref import AttributeRef
+from fastcs2.attribute_io_ref import AttributeIORef
 from fastcs2.controller_api import ControllerAPI
 from fastcs2.datatypes import DataType
 
@@ -9,7 +9,7 @@ class Transport:
         self.api = api
 
 
-async def print_attr_update(attr: AttributeR[AttributeRef, DataType]):
+async def print_attr_update(attr: AttributeR[AttributeIORef, DataType]):
     print(f"{attr.name}: {attr.get()}")
 
 
