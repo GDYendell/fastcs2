@@ -13,7 +13,7 @@ class MyAttrRef(AttributeRef):
     pass
 
 
-class MyControllerIO(ControllerIO[MyAttrRef, DataType]):
+class MyControllerIO(ControllerIO[MyAttrRef, DataType, DataType]):
     async def update(self, attr: AttributeR[MyAttrRef, DataType]):
         await attr.update(attr.datatype("ON"))
 

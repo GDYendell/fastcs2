@@ -10,7 +10,8 @@ from fastcs2.datatypes import DataType
 
 class Controller:
     def __init__(
-        self, io: dict[type[AttributeRef], ControllerIO[AttributeRef, DataType]]
+        self,
+        io: dict[type[AttributeRef], ControllerIO[AttributeRef, DataType, DataType]],
     ):
         self.io = io
         self.attributes: list[Attribute[AttributeRef, DataType]] = []

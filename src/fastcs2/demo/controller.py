@@ -16,7 +16,7 @@ from fastcs2.demo.io import (
     SensorsTemperaturesControllerIO,
 )
 
-IO_MAP: dict[type[AttributeRef], ControllerIO[AttributeRef, DataType]] = {
+IO_MAP: dict[type[AttributeRef], ControllerIO[AttributeRef, DataType, DataType]] = {
     ScreenBrightnessAttrRef: ScreenBrightnessControllerIO(),
     SensorsBatteryAttrRef: SensorsBatteryControllerIO(),
     SensorsTemperaturesAttrRef: SensorsTemperaturesControllerIO(),
