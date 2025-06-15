@@ -1,7 +1,11 @@
 import asyncio
+import logging
 
 from fastcs2.demo.controller import SystemMonitorController
 from fastcs2.engine import Engine
+
+# Log to file
+logging.basicConfig(filename="/tmp/fastcs.log", level=logging.DEBUG)
 
 loop = asyncio.new_event_loop()
 controller = SystemMonitorController()

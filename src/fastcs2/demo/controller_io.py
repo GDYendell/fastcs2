@@ -1,3 +1,4 @@
+import logging
 
 from psutil import sensors_battery, sensors_temperatures  # type: ignore
 
@@ -19,7 +20,7 @@ class SensorsTemperaturesControllerIO(
 
     async def update(self, attr: Attribute[SensorsTemperaturesAttrRef, DataType]):
         attr.set(self._get_temp(attr.ref))
-        print(f"{attr.name}: {attr.get()}")
+        logging.info(f"{attr.name}: {attr.get()}")
 
 
 class SensorsBatteryControllerIO(ControllerIO[SensorsBatteryAttrRef, DataType]):
@@ -28,7 +29,7 @@ class SensorsBatteryControllerIO(ControllerIO[SensorsBatteryAttrRef, DataType]):
 
     async def update(self, attr: Attribute[SensorsBatteryAttrRef, DataType]):
         attr.set(self._get_battery(attr.ref))
-        print(f"{attr.name}: {attr.get()}")
+        logging.info(f"{attr.name}: {attr.get()}")
 
 
 class AverageSummaryControllerIO(ControllerIO[AverageSummaryAttrRef, float]):
@@ -36,4 +37,4 @@ class AverageSummaryControllerIO(ControllerIO[AverageSummaryAttrRef, float]):
         attr.set(
             sum(attr.get() for attr in attr.ref.attributes) / len(attr.ref.attributes)
         )
-        print(f"{attr.name}: {attr.get()}")
+        logging.info(f"{attr.name}: {attr.get()}")
