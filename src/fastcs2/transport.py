@@ -9,14 +9,14 @@ class Transport:
         self.api = api
 
 
-async def log_attr_update(attr: AttributeR[AttributeRef, DataType]):
+async def print_attr_update(attr: AttributeR[AttributeRef, DataType]):
     print(f"{attr.name}: {attr.get()}")
 
 
-class LogTransport(Transport):
+class ConsoleTransport(Transport):
     def __init__(self, api: ControllerAPI):
         super().__init__(api)
 
         for attribute in api.attributes:
             if isinstance(attribute, AttributeR):
-                attribute.update_callbacks.append(log_attr_update)
+                attribute.update_callbacks.append(print_attr_update)
