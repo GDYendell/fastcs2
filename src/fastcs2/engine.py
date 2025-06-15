@@ -7,9 +7,11 @@ from fastcs2.controller import Controller
 from fastcs2.transport import Transport
 
 
-async def interactive_shell(context: dict[str, object]):
+async def interactive_shell(context: dict[str, object], stop_event: asyncio.Event):
     shell = InteractiveShellEmbed()
     await asyncio.to_thread(partial(shell.mainloop, local_ns=context))
+
+    stop_event.set()
 
 
 class Engine:
@@ -40,7 +42,10 @@ class Engine:
         for transport in self._transports:
             transport(api)
 
-        self._loop.create_task(interactive_shell({"controller": self._controller}))
+        stop_event = asyncio.Event()
 
-        while True:
-            await asyncio.sleep(1)
+        self._loop.create_task(
+            interactive_shell({"controller": self._controller}, stop_event)
+        )
+
+        await stop_event.wait()
