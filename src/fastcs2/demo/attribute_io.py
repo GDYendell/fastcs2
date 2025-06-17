@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 
 from psutil import sensors_battery, sensors_temperatures  # type: ignore
 from screen_brightness_control import get_brightness, set_brightness  # type: ignore
@@ -31,6 +31,8 @@ class SensorsTemperaturesAttributeIORef(AttributeIORef):
     key: str
     index: int
     field: str
+    _: KW_ONLY
+    update_period: float | None = 1.0
 
 
 class SensorsTemperaturesAttributeIO(
@@ -53,6 +55,8 @@ class SensorsTemperaturesAttributeIO(
 @dataclass
 class SensorsBatteryAttributeIORef(AttributeIORef):
     field: str
+    _: KW_ONLY
+    update_period: float | None = 10.0
 
 
 class SensorsBatteryAttributeIO(
@@ -70,6 +74,8 @@ class AverageSummaryAttributeIORef(AttributeIORef):
     attributes: list[AttributeR[AttributeIORef, float]] = field(
         default_factory=list[AttributeR[AttributeIORef, float]]
     )
+    _: KW_ONLY
+    update_period: float | None = 1.0
 
 
 class AverageSummaryAttributeIO(

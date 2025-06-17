@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Callable, Coroutine
 from functools import partial
 
 from IPython.terminal.embed import InteractiveShellEmbed
@@ -31,13 +32,19 @@ class FastCS:
 
         api = self._controller.build_api()
 
-        async def _scan():
-            while True:
-                await asyncio.gather(
-                    asyncio.sleep(1), *[update() for update in update_tasks]
-                )
+        for update_period, updates in update_tasks.items():
 
-        self._loop.create_task(_scan())
+            async def _scan(
+                _period: float = update_period,
+                _updates: list[Callable[[], Coroutine[None, None, None]]] = updates,
+            ):
+                while True:
+                    await asyncio.gather(
+                        asyncio.sleep(_period),
+                        *[update() for update in _updates],
+                    )
+
+            self._loop.create_task(_scan())
 
         for transport in self._transports:
             transport(api)

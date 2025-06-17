@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections.abc import Callable, Coroutine
 from functools import partial
 
@@ -42,14 +43,20 @@ class Controller:
 
     def create_update_tasks(
         self,
-    ) -> list[Callable[[], Coroutine[None, None, None]]]:
-        return [
-            partial(
-                self._attribute_ref_io_map[type(attribute.io_ref)].update, attribute
-            )
-            for attribute in self.attributes
-            if isinstance(attribute, AttributeR)
-        ]
+    ) -> dict[float, list[Callable[[], Coroutine[None, None, None]]]]:
+        update_tasks: dict[float, list[Callable[[], Coroutine[None, None, None]]]] = (
+            defaultdict(list)
+        )
+        for attribute in self.attributes:
+            if isinstance(attribute, AttributeR) and attribute.io_ref.update_period:
+                update_tasks[attribute.io_ref.update_period].append(
+                    partial(
+                        self._attribute_ref_io_map[type(attribute.io_ref)].update,
+                        attribute,
+                    )
+                )
+
+        return update_tasks
 
     def _link_attr_put_send_callbacks(self):
         for attribute in self.attributes:
