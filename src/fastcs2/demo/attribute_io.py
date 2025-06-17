@@ -22,7 +22,7 @@ class ScreenBrightnessAttributeIO(
     async def update(self, attr: AttributeR[AttributeIORef, DataType]):
         await attr.update(get_brightness()[0])
 
-    async def send(self, value: DataType):
+    async def send(self, attr: AttributeR[AttributeIORef, DataType], value: DataType):
         set_brightness(value)
 
 

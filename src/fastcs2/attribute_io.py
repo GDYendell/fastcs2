@@ -12,5 +12,7 @@ class AttributeIO(Generic[AttributeIORefT, DataTypeT, DataTypeInT]):
     async def update(self, attr: AttributeR[AttributeIORefT, DataTypeT]):
         pass
 
-    async def send(self, value: DataTypeInT):
+    async def send(
+        self, attr: AttributeR[AttributeIORefT, DataTypeT], value: DataTypeInT
+    ):
         pass
