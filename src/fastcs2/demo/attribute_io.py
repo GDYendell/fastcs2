@@ -16,7 +16,8 @@ class ScreenBrightnessAttributeIORef(AttributeIORef):
 class ScreenBrightnessAttributeIO(
     AttributeIO[ScreenBrightnessAttributeIORef, DataType, DataType]
 ):
-    ref = ScreenBrightnessAttributeIORef
+    def __init__(self):
+        super().__init__(ScreenBrightnessAttributeIORef)
 
     async def update(self, attr: AttributeR[AttributeIORef, DataType]):
         await attr.update(get_brightness()[0])
@@ -35,13 +36,17 @@ class SensorsTemperaturesAttributeIORef(AttributeIORef):
 class SensorsTemperaturesAttributeIO(
     AttributeIO[SensorsTemperaturesAttributeIORef, DataType, DataType]
 ):
-    ref = SensorsTemperaturesAttributeIORef
+    def __init__(self):
+        super().__init__(SensorsTemperaturesAttributeIORef)
 
     async def update(
         self, attr: AttributeR[SensorsTemperaturesAttributeIORef, DataType]
     ):
         await attr.update(
-            getattr(sensors_temperatures()[attr.io.key][attr.io.index], attr.io.field)
+            getattr(
+                sensors_temperatures()[attr.io_ref.key][attr.io_ref.index],
+                attr.io_ref.field,
+            )
         )
 
 
@@ -53,10 +58,11 @@ class SensorsBatteryAttributeIORef(AttributeIORef):
 class SensorsBatteryAttributeIO(
     AttributeIO[SensorsBatteryAttributeIORef, DataType, DataType]
 ):
-    ref = SensorsBatteryAttributeIORef
+    def __init__(self):
+        super().__init__(SensorsBatteryAttributeIORef)
 
     async def update(self, attr: AttributeR[SensorsBatteryAttributeIORef, DataType]):
-        await attr.update(getattr(sensors_battery(), attr.io.field))  # type: ignore
+        await attr.update(getattr(sensors_battery(), attr.io_ref.field))  # type: ignore
 
 
 @dataclass
@@ -69,9 +75,11 @@ class AverageSummaryAttributeIORef(AttributeIORef):
 class AverageSummaryAttributeIO(
     AttributeIO[AverageSummaryAttributeIORef, float, DataType]
 ):
-    ref = AverageSummaryAttributeIORef
+    def __init__(self):
+        super().__init__(AverageSummaryAttributeIORef)
 
     async def update(self, attr: AttributeR[AverageSummaryAttributeIORef, float]):
         await attr.update(
-            sum(attr.get() for attr in attr.io.attributes) / len(attr.io.attributes)
+            sum(attr.get() for attr in attr.io_ref.attributes)
+            / len(attr.io_ref.attributes)
         )

@@ -6,18 +6,18 @@ from fastcs2.datatypes import DataTypeT
 
 
 class Attribute(Generic[AttributeIORefT, DataTypeT]):
-    def __init__(self, name: str, datatype: type[DataTypeT], io: AttributeIORefT):
+    def __init__(self, name: str, datatype: type[DataTypeT], io_ref: AttributeIORefT):
         self.name = name
         self.datatype = datatype
-        self.io = io
+        self.io_ref = io_ref
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.name},  {self.datatype.__name__})"
 
 
 class AttributeR(Attribute[AttributeIORefT, DataTypeT]):
-    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttributeIORefT):
-        super().__init__(name, datatype, ref)
+    def __init__(self, name: str, datatype: type[DataTypeT], io_ref: AttributeIORefT):
+        super().__init__(name, datatype, io_ref)
 
         self._value = datatype()
 
@@ -37,8 +37,8 @@ class AttributeR(Attribute[AttributeIORefT, DataTypeT]):
 
 
 class AttributeW(Attribute[AttributeIORefT, DataTypeT]):
-    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttributeIORefT):
-        super().__init__(name, datatype, ref)
+    def __init__(self, name: str, datatype: type[DataTypeT], io_ref: AttributeIORefT):
+        super().__init__(name, datatype, io_ref)
 
         self.put_callbacks: list[
             Callable[[DataTypeT], Coroutine[None, None, None]]
@@ -53,8 +53,8 @@ class AttributeW(Attribute[AttributeIORefT, DataTypeT]):
 class AttributeRW(
     AttributeR[AttributeIORefT, DataTypeT], AttributeW[AttributeIORefT, DataTypeT]
 ):
-    def __init__(self, name: str, datatype: type[DataTypeT], ref: AttributeIORefT):
-        super().__init__(name, datatype, ref)
+    def __init__(self, name: str, datatype: type[DataTypeT], io_ref: AttributeIORefT):
+        super().__init__(name, datatype, io_ref)
 
     async def put(self, value: Any):
         await super().put(value)

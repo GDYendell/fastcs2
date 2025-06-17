@@ -1,13 +1,6 @@
 from functools import cached_property
 
-from fastcs2 import (
-    AttributeIO,
-    AttributeIORef,
-    AttributeR,
-    AttributeRW,
-    Controller,
-    DataType,
-)
+from fastcs2 import AttributeIORef, AttributeR, AttributeRW, Controller
 from fastcs2.demo.attribute_io import (
     AverageSummaryAttributeIO,
     AverageSummaryAttributeIORef,
@@ -18,13 +11,6 @@ from fastcs2.demo.attribute_io import (
     SensorsTemperaturesAttributeIO,
     SensorsTemperaturesAttributeIORef,
 )
-
-IO_MAP: dict[type[AttributeIORef], AttributeIO[AttributeIORef, DataType, DataType]] = {
-    ScreenBrightnessAttributeIORef: ScreenBrightnessAttributeIO(),
-    SensorsBatteryAttributeIORef: SensorsBatteryAttributeIO(),
-    SensorsTemperaturesAttributeIORef: SensorsTemperaturesAttributeIO(),
-    AverageSummaryAttributeIORef: AverageSummaryAttributeIO(),
-}
 
 
 class SystemMonitorController(Controller):
@@ -74,4 +60,11 @@ class SystemMonitorController(Controller):
             AverageSummaryAttributeIORef([self.cpu_temp, self.gpu_temp]),
         )
 
-        super().__init__(IO_MAP)
+        super().__init__(
+            [
+                AverageSummaryAttributeIO(),
+                ScreenBrightnessAttributeIO(),
+                SensorsBatteryAttributeIO(),
+                SensorsTemperaturesAttributeIO(),
+            ]
+        )

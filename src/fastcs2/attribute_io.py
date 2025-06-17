@@ -6,7 +6,8 @@ from fastcs2.datatypes import DataTypeInT
 
 
 class AttributeIO(Generic[AttributeIORefT, DataTypeT, DataTypeInT]):
-    ref: type[AttributeIORefT]
+    def __init__(self, io_ref: type[AttributeIORefT]):
+        self.ref = io_ref
 
     async def update(self, attr: AttributeR[AttributeIORefT, DataTypeT]):
         pass

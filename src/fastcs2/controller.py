@@ -7,13 +7,14 @@ from fastcs2.attribute_io_ref import AttributeIORef
 from fastcs2.controller_api import ControllerAPI
 from fastcs2.datatypes import DataType
 
+type AnyAttributeIO = AttributeIO[AttributeIORef, DataType, DataType]
 
 class Controller:
-    def __init__(
-        self,
-        io: dict[type[AttributeIORef], AttributeIO[AttributeIORef, DataType, DataType]],
-    ):
-        self.io = io
+    def __init__(self, attribute_io: AnyAttributeIO | list[AnyAttributeIO]):
+        if not isinstance(attribute_io, list):
+            attribute_io = [attribute_io]
+
+        self._attribute_ref_io_map = {io.ref: io for io in attribute_io}
         self.attributes: list[Attribute[AttributeIORef, DataType]] = []
 
         self._bind_attrs()
@@ -26,8 +27,13 @@ class Controller:
 
             attribute = getattr(self, attribute_name)
             if isinstance(attribute, AttributeR | AttributeW):
-                io_type = type(attribute.io)  # type: ignore
-                assert issubclass(io_type, AttributeIORef)
+                io_ref_cls = type(attribute.io_ref)  # type: ignore
+                assert issubclass(io_ref_cls, AttributeIORef)
+
+                assert io_ref_cls in self._attribute_ref_io_map, (
+                    f"{self.__class__.__name__} does not have an AttributeIO to handle "
+                    f"{io_ref_cls.__name__}"
+                )
 
                 self.attributes.append(attribute)  # type: ignore
 
@@ -38,7 +44,9 @@ class Controller:
         self,
     ) -> list[Callable[[], Coroutine[None, None, None]]]:
         return [
-            partial(self.io[type(attribute.io)].update, attribute)
+            partial(
+                self._attribute_ref_io_map[type(attribute.io_ref)].update, attribute
+            )
             for attribute in self.attributes
             if isinstance(attribute, AttributeR)
         ]
@@ -46,7 +54,9 @@ class Controller:
     def _link_attr_put_send_callbacks(self):
         for attribute in self.attributes:
             if isinstance(attribute, AttributeRW):
-                attribute.put_callbacks.append(self.io[type(attribute.io)].send)
+                attribute.put_callbacks.append(
+                    self._attribute_ref_io_map[type(attribute.io_ref)].send
+                )
 
     def build_api(self) -> ControllerAPI:
         return ControllerAPI(self.attributes)
