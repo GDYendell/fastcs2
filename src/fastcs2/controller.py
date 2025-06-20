@@ -19,7 +19,6 @@ class Controller:
         self.attributes: list[Attribute[AttributeIORef, DataType]] = []
 
         self._bind_attrs()
-        self._link_attr_put_send_callbacks()
 
     def _bind_attrs(self):
         for attribute_name in dir(self):
@@ -29,17 +28,23 @@ class Controller:
             attribute = getattr(self, attribute_name)
             if isinstance(attribute, AttributeR | AttributeW):
                 io_ref_cls = type(attribute.io_ref)  # type: ignore
+
+                if io_ref_cls == AttributeIORef:
+                    continue
+
                 assert issubclass(io_ref_cls, AttributeIORef)
-
-                assert io_ref_cls in self._attribute_ref_io_map, (
-                    f"{self.__class__.__name__} does not have an AttributeIO to handle "
-                    f"{io_ref_cls.__name__}"
-                )
-
-                self.attributes.append(attribute)  # type: ignore
 
     async def initialise(self):
         pass
+
+    async def post_initialise(self):
+        for attribute in self._attributes.values():
+            assert attribute.io_ref.__class__ in self._attribute_ref_io_map.keys(), (
+                f"{self.__class__.__name__} does not have an AttributeIO to handle "
+                f"{attribute.io_ref.__class__.__name__}"
+            )
+
+        self._link_attr_put_send_callbacks()
 
     def create_update_tasks(
         self,

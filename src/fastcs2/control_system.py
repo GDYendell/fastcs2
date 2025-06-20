@@ -28,6 +28,8 @@ class FastCS:
 
     async def serve(self) -> None:
         await self._controller.initialise()
+        await self._controller.post_initialise()
+
         update_tasks = self._controller.create_update_tasks()
 
         api = self._controller.build_api()
