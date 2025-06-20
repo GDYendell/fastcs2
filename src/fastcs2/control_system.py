@@ -18,13 +18,13 @@ async def interactive_shell(context: dict[str, object], stop_event: asyncio.Even
 class FastCS:
     def __init__(
         self,
-        loop: asyncio.AbstractEventLoop,
         controller: Controller,
-        transports: list[type[Transport]],
+        transport: type[Transport] | list[type[Transport]],
+        loop: asyncio.AbstractEventLoop | None = None,
     ) -> None:
-        self._loop = loop
         self._controller = controller
-        self._transports = transports
+        self._transports = transport if isinstance(transport, list) else [transport]
+        self._loop = loop or asyncio.new_event_loop()
 
     async def serve(self) -> None:
         await self._controller.initialise()
@@ -66,3 +66,6 @@ class FastCS:
         )
 
         await stop_event.wait()
+
+    def run(self) -> None:
+        self._loop.run_until_complete(self.serve())
