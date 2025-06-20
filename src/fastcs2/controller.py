@@ -8,7 +8,7 @@ from fastcs2.attribute_io_ref import AttributeIORef
 from fastcs2.controller_api import ControllerAPI
 from fastcs2.datatypes import DataType
 
-type AnyAttributeIO = AttributeIO[AttributeIORef, DataType, DataType]
+AnyAttributeIO = AttributeIO[AttributeIORef, DataType, DataType]
 
 class Controller:
     def __init__(self, attribute_io: AnyAttributeIO | list[AnyAttributeIO]):
