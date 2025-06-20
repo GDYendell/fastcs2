@@ -51,8 +51,16 @@ class FastCS:
 
         stop_event = asyncio.Event()
 
+        def run(coro: Coroutine[None, None, None]):
+            """Run coroutine on FastCS event loop from IPython thread."""
+
+            def wrapper():
+                asyncio.create_task(coro)
+
+            self._loop.call_soon_threadsafe(wrapper)
+
         self._loop.create_task(
-            interactive_shell({"controller": self._controller}, stop_event)
+            interactive_shell({"controller": self._controller, "run": run}, stop_event)
         )
 
         await stop_event.wait()
