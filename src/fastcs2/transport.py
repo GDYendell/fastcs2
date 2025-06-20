@@ -17,6 +17,6 @@ class ConsoleTransport(Transport):
     def __init__(self, api: ControllerAPI):
         super().__init__(api)
 
-        for attribute in api.attributes:
+        for attribute in api.attributes.values():
             if isinstance(attribute, AttributeR):
                 attribute.update_callbacks.append(print_attr_update)

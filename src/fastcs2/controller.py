@@ -16,9 +16,12 @@ class Controller:
             attribute_io = [attribute_io]
 
         self._attribute_ref_io_map = {io.ref: io for io in attribute_io}
-        self.attributes: list[Attribute[AttributeIORef, DataType]] = []
+        self._attributes: dict[str, Attribute[AttributeIORef, DataType]] = {}
 
         self._bind_attrs()
+
+    def add_attribute(self, attribute: Attribute[AttributeIORef, DataType]):
+        self._attributes[attribute.name] = attribute
 
     def _bind_attrs(self):
         for attribute_name in dir(self):
@@ -33,6 +36,8 @@ class Controller:
                     continue
 
                 assert issubclass(io_ref_cls, AttributeIORef)
+
+                self.add_attribute(attribute)  # type: ignore
 
     async def initialise(self):
         pass
@@ -52,7 +57,7 @@ class Controller:
         update_tasks: dict[float, list[Callable[[], Coroutine[None, None, None]]]] = (
             defaultdict(list)
         )
-        for attribute in self.attributes:
+        for attribute in self._attributes.values():
             if isinstance(attribute, AttributeR) and attribute.io_ref.update_period:
                 update_tasks[attribute.io_ref.update_period].append(
                     partial(
@@ -64,11 +69,11 @@ class Controller:
         return update_tasks
 
     def _link_attr_put_send_callbacks(self):
-        for attribute in self.attributes:
+        for attribute in self._attributes.values():
             if isinstance(attribute, AttributeRW):
                 attribute.put_callbacks.append(
                     self._attribute_ref_io_map[type(attribute.io_ref)].send
                 )
 
     def build_api(self) -> ControllerAPI:
-        return ControllerAPI(self.attributes)
+        return ControllerAPI(self._attributes)

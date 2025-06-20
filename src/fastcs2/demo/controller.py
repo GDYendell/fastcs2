@@ -38,7 +38,7 @@ class SystemMonitorController(Controller):
     @cached_property
     def _temperature_attributes(self) -> list[AttributeR[AttributeIORef, float]]:
         temperature_attributes: list[AttributeR[AttributeIORef, float]] = []
-        for attribute in self.attributes:
+        for attribute in self._attributes.values():
             if attribute.name.startswith("temp_"):
                 assert issubclass(attribute.datatype, float)
                 temperature_attributes.append(attribute)  # type:ignore

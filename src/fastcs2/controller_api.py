@@ -7,4 +7,4 @@ from fastcs2.datatypes import DataType
 
 @dataclass(frozen=True)
 class ControllerAPI:
-    attributes: list[Attribute[AttributeIORef, DataType]]
+    attributes: dict[str, Attribute[AttributeIORef, DataType]]
