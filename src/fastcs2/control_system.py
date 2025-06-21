@@ -1,18 +1,12 @@
 import asyncio
 from collections.abc import Callable, Coroutine
 from functools import partial
+from typing import Any
 
 from IPython.terminal.embed import InteractiveShellEmbed
 
 from fastcs2.controller import Controller
 from fastcs2.transport import Transport
-
-
-async def interactive_shell(context: dict[str, object], stop_event: asyncio.Event):
-    shell = InteractiveShellEmbed()
-    await asyncio.to_thread(partial(shell.mainloop, local_ns=context))
-
-    stop_event.set()
 
 
 class FastCS:
@@ -46,10 +40,17 @@ class FastCS:
             self._loop.create_task(_scan())
 
         api = self._controller.build_api()
-        for transport in self._transports:
-            transport(api)
 
-        stop_event = asyncio.Event()
+        context = {"controller": self._controller}
+        for transport_cls in self._transports:
+            # TODO: Register transports with key and use as prefix to avoid conflicts
+            transport = transport_cls(api)
+            context.update(transport.context)
+
+        await self._interactive_shell(context)
+
+    async def _interactive_shell(self, context: dict[str, Any]):
+        """Spawn interactive shell in another thread and wait for it to complete."""
 
         def run(coro: Coroutine[None, None, None]):
             """Run coroutine on FastCS event loop from IPython thread."""
@@ -59,10 +60,19 @@ class FastCS:
 
             self._loop.call_soon_threadsafe(wrapper)
 
-        self._loop.create_task(
-            interactive_shell({"controller": self._controller, "run": run}, stop_event)
-        )
+        async def interactive_shell(
+            context: dict[str, object], stop_event: asyncio.Event
+        ):
+            """Run interactive shell in a new thread."""
+            shell = InteractiveShellEmbed()
+            await asyncio.to_thread(partial(shell.mainloop, local_ns=context))
 
+            stop_event.set()
+
+        context["run"] = run
+
+        stop_event = asyncio.Event()
+        self._loop.create_task(interactive_shell(context, stop_event))
         await stop_event.wait()
 
     def run(self) -> None:
