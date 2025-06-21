@@ -1,26 +1,27 @@
 from collections import defaultdict
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable, Coroutine, Sequence
 from functools import partial
 
-from fastcs2.attribute import Attribute, AttributeR, AttributeRW, AttributeW
-from fastcs2.attribute_io import AttributeIO
+from fastcs2.attribute import AnyAttribute, AttributeR, AttributeRW, AttributeW
+from fastcs2.attribute_io import AnyAttributeIO
 from fastcs2.attribute_io_ref import AttributeIORef
 from fastcs2.controller_api import ControllerAPI
-from fastcs2.datatypes import DataType
 
-AnyAttributeIO = AttributeIO[AttributeIORef, DataType, DataType]
 
 class Controller:
-    def __init__(self, attribute_io: AnyAttributeIO | list[AnyAttributeIO]):
-        if not isinstance(attribute_io, list):
+    def __init__(self, attribute_io: AnyAttributeIO | Sequence[AnyAttributeIO]):
+        if not isinstance(attribute_io, Sequence):
             attribute_io = [attribute_io]
 
         self._attribute_ref_io_map = {io.ref: io for io in attribute_io}
-        self._attributes: dict[str, Attribute[AttributeIORef, DataType]] = {}
+        self._attributes: dict[str, AnyAttribute] = {}
+
+        self.path: list[str] = []
+        self._sub_controllers: dict[str, Controller] = {}
 
         self._bind_attrs()
 
-    def add_attribute(self, attribute: Attribute[AttributeIORef, DataType]):
+    def add_attribute(self, attribute: AnyAttribute):
         self._attributes[attribute.name] = attribute
 
     def _bind_attrs(self):
@@ -49,6 +50,9 @@ class Controller:
                 f"{attribute.io_ref.__class__.__name__}"
             )
 
+        for sub_controller in self._sub_controllers.values():
+            await sub_controller.post_initialise()
+
         self._link_attr_put_send_callbacks()
 
     def create_update_tasks(
@@ -66,6 +70,10 @@ class Controller:
                     )
                 )
 
+        for sub_controller in self._sub_controllers.values():
+            for period, updates in sub_controller.create_update_tasks().items():
+                update_tasks[period].extend(updates)
+
         return update_tasks
 
     def _link_attr_put_send_callbacks(self):
@@ -75,5 +83,21 @@ class Controller:
                     self._attribute_ref_io_map[type(attribute.io_ref)].send
                 )
 
+    def register_sub_controller(self, name: str, controller: "Controller"):
+        if name in self._sub_controllers:
+            raise ValueError(f"Controller already has a subcontroller under {name}")
+        if controller.path:
+            raise ValueError("Controller already registered at path {controller._path}")
+
+        controller.path = self.path + [name]
+        self._sub_controllers[name] = controller
+
     def build_api(self) -> ControllerAPI:
-        return ControllerAPI(self._attributes)
+        return ControllerAPI(
+            self.path,
+            self._attributes,
+            {
+                name: controller.build_api()
+                for name, controller in self._sub_controllers.items()
+            },
+        )

@@ -31,9 +31,6 @@ class FastCS:
         await self._controller.post_initialise()
 
         update_tasks = self._controller.create_update_tasks()
-
-        api = self._controller.build_api()
-
         for update_period, updates in update_tasks.items():
 
             async def _scan(
@@ -48,6 +45,7 @@ class FastCS:
 
             self._loop.create_task(_scan())
 
+        api = self._controller.build_api()
         for transport in self._transports:
             transport(api)
 

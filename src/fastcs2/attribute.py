@@ -1,8 +1,8 @@
 from collections.abc import Callable, Coroutine
 from typing import Any, Generic, Self
 
-from fastcs2.attribute_io_ref import AttributeIORefT
-from fastcs2.datatypes import DataTypeT
+from fastcs2.attribute_io_ref import AttributeIORef, AttributeIORefT
+from fastcs2.datatypes import DataType, DataTypeT
 
 
 class Attribute(Generic[AttributeIORefT, DataTypeT]):
@@ -22,7 +22,7 @@ class AttributeR(Attribute[AttributeIORefT, DataTypeT]):
         self._value = datatype()
 
         self.update_callbacks: list[Callable[[Self], Coroutine[None, None, None]]] = []
-        """Callbacks to be called when the attribute is updated from hardware"""
+        """Callbacks to be called when the attribute is updated by an IO"""
 
     def get(self) -> DataTypeT:
         return self._value
@@ -43,7 +43,7 @@ class AttributeW(Attribute[AttributeIORefT, DataTypeT]):
         self.put_callbacks: list[
             Callable[[Self, DataTypeT], Coroutine[None, None, None]]
         ] = []
-        """Callbacks to be called when the attribute is set from an API call"""
+        """Callbacks to be called when the attribute is changed from an API call"""
 
     async def put(self, value: Any):
         for callback in self.put_callbacks:
@@ -59,3 +59,6 @@ class AttributeRW(
     async def put(self, value: Any):
         await super().put(value)
         self._set(value)
+
+
+AnyAttribute = Attribute[AttributeIORef, DataType]
