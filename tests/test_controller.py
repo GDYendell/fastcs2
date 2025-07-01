@@ -36,6 +36,7 @@ async def test_controller():
     assert controller.state.get() == "ON"
 
 
+@pytest.mark.xfail(reason="Depends on hardware")
 @pytest.mark.asyncio
 async def test_sys_controller():
     controller = SystemMonitorController()
