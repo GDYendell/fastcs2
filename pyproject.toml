@@ -12,7 +12,11 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 description = "FastCS2"
-dependencies = [] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = [
+    "psutil",
+    "screen-brightness-control",
+    "IPython",
+]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
